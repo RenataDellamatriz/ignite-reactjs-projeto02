@@ -1,20 +1,39 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
-
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
 import {
+  TaskInput,
+  MinutesAmountInput,
   CountdownContainer,
   FormContainer,
   HomeContainer,
-  MinutesAmountInput,
   Separator,
   StartCountdownButton,
-  TaskInput,
 } from './styles'
 
-export function Home() {
-  const { register, handleSubmit, watch } = useForm()
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Informe a tarefa'),
+  minutesAmount: zod
+    .number()
+    .min(5)
+    .max(60, 'tem que ser menos que 60 minutos doido'),
+})
 
-  function handleCreateNewCyle(data: any) {
+// o zod possui uma integração com o typescript
+// lembrando que seria possível usar uma interface no lugar do zod.infer...
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+
+export function Home() {
+  const { register, handleSubmit, watch } = useForm<NewCycleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
+  })
+
+  function handleCreateNewCyle(data: NewCycleFormData) {
     console.log(data)
   }
 
@@ -48,7 +67,7 @@ export function Home() {
             placeholder="00"
             step={5}
             min={0}
-            max={60}
+            // max={60}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
           <span>minutos.</span>
