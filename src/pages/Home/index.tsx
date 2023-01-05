@@ -11,6 +11,7 @@ import {
   Separator,
   StartCountdownButton,
 } from './styles'
+import { useState } from 'react'
 
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Informe a tarefa'),
@@ -24,7 +25,16 @@ const newCycleFormValidationSchema = zod.object({
 // lembrando que seria possível usar uma interface no lugar do zod.infer...
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle {
+  id: string
+  task: string
+  minutesAmount: number
+}
+
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([]) // armazena os ciclos
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
   const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
@@ -34,9 +44,20 @@ export function Home() {
   })
 
   function handleCreateNewCyle(data: NewCycleFormData) {
-    console.log(data)
+    const id = String(new Date().getTime())
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+    // sempre que o estado depender de uma informação interior, usar o formato abaixo.
+    setCycles((state) => [...state, newCycle])
+    setActiveCycleId(id)
     reset()
   }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   const task = watch('task' && 'minutesAmount')
   const isSubmitDisabled = !task /* facilita a leitura do código */
@@ -68,7 +89,7 @@ export function Home() {
             placeholder="00"
             step={5}
             min={0}
-            // max={60}
+            max={60}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
           <span>minutos.</span>
