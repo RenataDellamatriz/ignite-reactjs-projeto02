@@ -54,7 +54,9 @@ export function CyclesContextProvider({
         }
       }),
     )
+    setActiveCycleId(null)
   }
+  console.log(activeCycleId)
 
   function createNewCycle(data: CreateCycleData) {
     const id = String(new Date().getTime())
@@ -69,8 +71,6 @@ export function CyclesContextProvider({
     setCycles((state) => [...state, newCycle])
     setActiveCycleId(id)
     setAmountSecondsPassed(0)
-
-    // reset()
   }
 
   function interruptCurrentCycle() {
